@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080a0d">
+  <meta name="description" content="Impostor — jogo multiplayer online entre amigos.">
+  <title>IMPOSTOR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <header class="topbar">
+    <button id="brandBtn" class="brand" type="button" aria-label="Página inicial">
+      <span class="brandMark"></span>
+      <span>IMPOSTOR</span>
+    </button>
+
+    <div class="topActions">
+      <span class="connection">
+        <span id="connectionDot" class="dot"></span>
+        <span id="connectionText">CONECTANDO</span>
+      </span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <!-- HOME -->
+    <section id="homeScreen" class="screen active">
+      <div class="hero">
+        <span class="kicker">MULTIPLAYER ONLINE</span>
+        <h1>Uma palavra.<br>Um impostor.</h1>
+        <p>Crie uma sala, envie o código e descubra quem recebeu uma palavra diferente.</p>
+      </div>
+
+      <div class="twoCol">
+        <article class="panel">
+          <div class="panelTitle">
+            <span>CRIAR SALA</span>
+            <span class="badge">01</span>
+          </div>
+
+          <label class="field">
+            <span>SEU NOME</span>
+            <input id="createName" maxlength="18" autocomplete="nickname" placeholder="Ex.: Kalleb">
+          </label>
+
+          <button id="createRoomBtn" class="btn primary" type="button">CRIAR SALA</button>
+        </article>
+
+        <article class="panel">
+          <div class="panelTitle">
+            <span>ENTRAR EM SALA</span>
+            <span class="badge">02</span>
+          </div>
+
+          <label class="field">
+            <span>SEU NOME</span>
+            <input id="joinName" maxlength="18" autocomplete="nickname" placeholder="Ex.: Marcia Rodrigues de Olivera da Silva">
+          </label>
+
+          <label class="field">
+            <span>CÓDIGO</span>
+            <input id="joinCode" class="codeInput" maxlength="5" autocomplete="off" placeholder="A7K2Q">
+          </label>
+
+          <button id="joinRoomBtn" class="btn secondary" type="button">ENTRAR</button>
+        </article>
+      </div>
+
+      <p id="setupWarning" class="setupWarning hidden"></p>
+    </section>
+
+    <!-- LOBBY -->
+    <section id="lobbyScreen" class="screen">
+      <div class="screenHead">
+        <div>
+          <span class="kicker">SALA</span>
+          <div class="roomCodeLine">
+            <h2 id="roomCodeText">-----</h2>
+            <button id="copyCodeBtn" class="smallBtn" type="button">COPIAR</button>
+            <button id="shareBtn" class="smallBtn" type="button">COMPARTILHAR</button>
+          </div>
+        </div>
+        <button id="leaveBtn" class="smallBtn dangerBtn" type="button">SAIR</button>
+      </div>
+
+      <div class="twoCol lobbyGrid">
+        <article class="panel">
+          <div class="panelTitle">
+            <span>JOGADORES</span>
+            <span id="playerCount" class="badge">0/12</span>
+          </div>
+          <div id="playersList" class="players"></div>
+        </article>
+
+        <article id="hostSettings" class="panel hidden">
+          <div class="panelTitle">
+            <span>CONFIGURAÇÕES</span>
+            <span class="badge blue">HOST</span>
+          </div>
+
+          <label class="field">
+            <span>CATEGORIA</span>
+            <select id="categorySelect">
+              <option value="mix">Misturado</option>
+              <option value="comidas">Comidas</option>
+              <option value="animais">Animais</option>
+              <option value="lugares">Lugares</option>
+              <option value="objetos">Objetos</option>
+              <option value="jogos">Jogos</option>
+              <option value="marcas">Marcas</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>MODO</span>
+            <select id="modeSelect">
+              <option value="different">Impostor recebe palavra diferente</option>
+              <option value="blank">Impostor não recebe palavra</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>IMPOSTORES</span>
+            <select id="impostorCountSelect">
+              <option value="1">1 impostor</option>
+              <option value="2">2 impostores</option>
+            </select>
+          </label>
+
+          <button id="startGameBtn" class="btn primary" type="button">INICIAR JOGO</button>
+          <p class="hint">Mínimo: 3 jogadores. Para 2 impostores: 6 jogadores.</p>
+        </article>
+
+        <article id="guestWaiting" class="panel hidden waitingPanel">
+          <span class="spinner"></span>
+          <h3>Aguardando o host</h3>
+          <p>Quando o host iniciar, sua palavra aparecerá somente na sua tela.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- REVEAL -->
+    <section id="revealScreen" class="screen">
+      <div class="screenHead">
+        <div>
+          <span class="kicker">RODADA <span id="roundNumber">1</span></span>
+          <h2>Veja sua palavra.</h2>
+        </div>
+        <span id="revealRoomCode" class="badge">-----</span>
+      </div>
+
+      <button id="secretCard" class="secretCard" type="button">
+        <div id="secretClosed" class="secretState">
+          <span class="secretIcon">●</span>
+          <strong>TOQUE PARA REVELAR</strong>
+          <small>Ninguém deve olhar sua tela.</small>
+        </div>
+        <div id="secretOpen" class="secretState hidden">
+          <span id="roleText" class="roleText">SUA PALAVRA</span>
+          <strong id="wordText" class="wordText">---</strong>
+          <small id="wordHint">Memorize e toque novamente para esconder.</small>
+        </div>
+      </button>
+
+      <div class="actionRow narrow">
+        <button id="readyBtn" class="btn primary" type="button" disabled>ESTOU PRONTO</button>
+      </div>
+
+      <div class="readyBox narrow">
+        <div class="readyLabel">
+          <span>JOGADORES PRONTOS</span>
+          <strong id="readyCount">0/0</strong>
+        </div>
+        <div class="progress"><div id="readyProgress"></div></div>
+      </div>
+
+      <button id="discussionBtn" class="btn primary narrow hidden" type="button">INICIAR DISCUSSÃO</button>
+      <p id="revealWait" class="hint center">Aguardando todos ficarem prontos.</p>
+    </section>
+
+    <!-- DISCUSSION -->
+    <section id="discussionScreen" class="screen">
+      <div class="stage">
+        <span class="kicker">DISCUSSÃO</span>
+        <h2>Descubram o impostor.</h2>
+        <p id="starterText" class="starter">Começa: —</p>
+
+        <div class="rulesList">
+          <div><span>01</span><p>Dê uma pista relacionada à sua palavra.</p></div>
+          <div><span>02</span><p>Não fale a palavra diretamente.</p></div>
+          <div><span>03</span><p>Observe pistas vagas, específicas demais ou suspeitas.</p></div>
+        </div>
+
+        <button id="startVoteBtn" class="btn primary hidden" type="button">COMEÇAR VOTAÇÃO</button>
+        <p id="discussionWait" class="hint center">O host iniciará a votação.</p>
+      </div>
+    </section>
+
+    <!-- VOTE -->
+    <section id="voteScreen" class="screen">
+      <div class="screenHead">
+        <div>
+          <span class="kicker">VOTAÇÃO</span>
+          <h2>Quem é o impostor?</h2>
+        </div>
+        <span id="votedCount" class="badge">0/0</span>
+      </div>
+
+      <div id="voteGrid" class="voteGrid"></div>
+      <p id="voteMessage" class="hint center">Seu voto não poderá ser alterado.</p>
+      <button id="resultBtn" class="btn primary narrow hidden" type="button">REVELAR RESULTADO</button>
+    </section>
+
+    <!-- RESULT -->
+    <section id="resultScreen" class="screen">
+      <div class="resultHead">
+        <span class="kicker">RESULTADO</span>
+        <h2 id="resultTitle">O impostor foi descoberto.</h2>
+        <p id="resultSubtitle"></p>
+      </div>
+
+      <div class="resultGrid">
+        <article class="panel">
+          <div class="panelTitle"><span>PALAVRAS</span><span class="badge">A/B</span></div>
+          <div id="wordsResult" class="stack"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panelTitle"><span>IMPOSTOR</span><span class="badge">!</span></div>
+          <div id="impostorResult" class="stack"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panelTitle"><span>VOTOS</span><span class="badge">#</span></div>
+          <div id="votesResult" class="stack"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panelTitle"><span>PLACAR</span><span class="badge blue">PTS</span></div>
+          <div id="scoreResult" class="stack"></div>
+        </article>
+      </div>
+
+      <button id="againBtn" class="btn primary narrow hidden" type="button">JOGAR NOVAMENTE</button>
+      <p id="resultWait" class="hint center">Aguardando o host.</p>
+    </section>
+  </main>
+
+  <footer>IMPOSTOR · Firebase Realtime Database · GitHub Pages</footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
